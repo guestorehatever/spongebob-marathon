@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1F5FBF">
+<title>Which Character Are You? — SpongeBob Marathon on GioTV</title>
+<link rel="icon" href="{{LOGO}}">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!--NAV-->
+
+<div class="wrap">
+  <h1 class="title-xl" style="text-align:center;margin-top:26px">Which Character Are You?</h1>
+  <p class="section-sub">Eight questions. Zero science. One hundred percent accurate.</p>
+  <img class="mascot" src="{{patrick}}" alt="Patrick Star">
+
+  <div class="quiz-shell">
+    <div class="card" id="box">
+      <div class="qmeta"><span id="pnum">1 / 8</span><span>🧽 Personality Test</span></div>
+      <div class="qbar"><i id="pfill"></i></div>
+      <div class="qtext" id="ptext"></div>
+      <div class="answers" id="popts"></div>
+    </div>
+
+    <div class="card" id="res" style="display:none;text-align:center">
+      <h3 style="font-size:2.6rem" id="rname"></h3>
+      <img id="rimg" alt="" hidden style="height:190px;width:auto;max-width:100%;filter:drop-shadow(0 8px 6px rgba(0,0,0,.3))">
+      <div class="big-out" id="rdesc" style="margin-top:14px"></div>
+      <p id="rtraits" style="font-weight:700;margin-top:12px"></p>
+      <div class="btnrow center">
+        <button class="btn green" id="retake">Take It Again</button>
+        <a class="btn blue" href="trivia.html">Now Try Trivia ➜</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--FOOT-->
+
+<script src="js/common.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const Q=[
+ {q:"It's 6 AM. What are you doing?",a:[
+  ["Already awake, singing, thrilled to exist","sb"],
+  ["Asleep. Deeply. Do not disturb.","pat"],
+  ["Awake and already annoyed","squid"],
+  ["Counting yesterday's earnings","krabs"]]},
+ {q:"Your ideal Saturday:",a:[
+  ["Jellyfishing with a best friend","sb"],
+  ["Lying under a rock doing nothing","pat"],
+  ["Painting, art gallery, interpretive dance","squid"],
+  ["Karate and a science experiment","sandy"]]},
+ {q:"Someone insults you. You:",a:[
+  ["Laugh. You genuinely didn't notice","sb"],
+  ["Say something confusing back","pat"],
+  ["Deliver a devastating one-liner","squid"],
+  ["Plot elaborate revenge for years","plank"]]},
+ {q:"Pick a snack:",a:[
+  ["Krabby Patty, obviously","sb"],
+  ["Whatever's closest. All of it.","pat"],
+  ["Canned bread. It's fine.","squid"],
+  ["Anything free","krabs"]]},
+ {q:"Your greatest strength:",a:[
+  ["Relentless optimism","sb"],
+  ["Total lack of worry","pat"],
+  ["Refined taste","squid"],
+  ["Actual intelligence","sandy"]]},
+ {q:"Your biggest flaw:",a:[
+  ["You try way too hard","sb"],
+  ["You don't try at all","pat"],
+  ["You're a bit bitter","squid"],
+  ["Greed. Sweet, sweet greed.","krabs"]]},
+ {q:"Group project. You're the one who:",a:[
+  ["Does everything with a huge smile","sb"],
+  ["Contributes one bad idea","pat"],
+  ["Complains the entire time","squid"],
+  ["Takes over and makes it excellent","sandy"]]},
+ {q:"How do you handle failure?",a:[
+  ["Cry loudly, then try again","sb"],
+  ["Forget it happened instantly","pat"],
+  ["Add it to the list","squid"],
+  ["Immediately start plan #4,782","plank"]]}
+];
+const R={
+ sb:{n:"SpongeBob SquarePants",img:'{{spongebob}}',d:"You are pure, unfiltered enthusiasm. You'd flip patties for free and call it the best day ever. Somehow everyone loves you — even the people pretending they don't.",t:"Optimistic · Loyal · Exhausting (affectionately)"},
+ pat:{n:"Patrick Star",img:'{{patrick}}',d:"The inner machinations of your mind are an enigma. You're not lazy, you're conserving energy for an occasion that will never come. Bliss.",t:"Chill · Chaotic · Suspiciously wise sometimes"},
+ squid:{n:"Squidward Tentacles",img:'{{squidward}}',d:"You have taste, standards, and a headache. You want peace, quiet, and one uninterrupted clarinet solo. You will get none of these things.",t:"Sarcastic · Artistic · Deeply tired"},
+ krabs:{n:"Mr. Krabs",img:'{{krabs}}',d:"You smell an opportunity from a mile away and you're already charging admission for it. Business is business, and business is good.",t:"Shrewd · Hustling · Slightly unhinged about money"},
+ sandy:{n:"Sandy Cheeks",img:'{{sandy}}',d:"Smart, capable, and able to karate-chop a problem in half. You're the one who actually reads the instructions — and then improves them.",t:"Brilliant · Competitive · Unstoppable"},
+ plank:{n:"Plankton",img:'{{plankton}}',d:"Small, loud, and armed with plan number 4,782. You WILL get that formula. Eventually. Probably not. But the ambition is genuinely inspiring.",t:"Ambitious · Genius · 0 for 4,781"}
+};
+let i=0,tally={};
+function render(){
+  const q=Q[i];
+  $('pnum').textContent=(i+1)+' / '+Q.length;
+  $('pfill').style.width=(i/Q.length*100)+'%';
+  $('ptext').textContent=q.q;
+  const box=$('popts');box.innerHTML='';
+  shuffle(q.a).forEach(([txt,key])=>{
+    const b=document.createElement('button');b.className='ans';b.textContent=txt;
+    b.onclick=()=>{tally[key]=(tally[key]||0)+1;i++;i<Q.length?render():finish();};
+    box.appendChild(b);
+  });
+}
+function finish(){
+  let best='sb',n=-1;
+  for(const k in tally) if(tally[k]>n){n=tally[k];best=k;}
+  const r=R[best];
+  $('box').style.display='none';$('res').style.display='block';
+  $('rname').textContent="You're "+r.n+"!";
+  $('rimg').src=r.img;$('rimg').hidden=false;$('rimg').alt=r.n;$('rdesc').textContent=r.d;$('rtraits').textContent=r.t;
+  toast('Result unlocked!');
+}
+$('retake').onclick=()=>{i=0;tally={};$('res').style.display='none';$('box').style.display='block';render();};
+render();
+</script>
+</body>
+</html>

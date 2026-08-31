@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1F5FBF">
+<title>Games — SpongeBob Marathon on GioTV</title>
+<link rel="icon" href="{{LOGO}}">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!--NAV-->
+
+<div class="wrap">
+  <h1 class="title-xl" style="text-align:center;margin-top:26px">The Games Arcade</h1>
+  <p class="section-sub">Five ways to waste a perfectly good afternoon. You're welcome.</p>
+
+  <!-- ===== PATTY BUILDER ===== -->
+  <h2 class="section-title" id="patty">🍔 Krabby Patty Builder</h2>
+  <img class="mascot" src="{{krabs}}" alt="Mr. Krabs">
+  <div class="card">
+    <p>Stack it however you want — then hit <b>Grade My Patty</b> and let Mr. Krabs judge you. The official order is: bun, ketchup, mustard, patty, cheese, lettuce, tomato, onion, pickle, bun.</p>
+    <div class="patty-stage" id="stage"></div>
+    <div class="ing-btns" id="ings"></div>
+    <div class="btnrow">
+      <button class="btn green" id="grade">👨‍🍳 Grade My Patty</button>
+      <button class="btn red" id="dump">🗑️ Start Over</button>
+    </div>
+    <div class="big-out" id="pattyout" style="margin-top:14px">Empty plate. Sad plate.</div>
+  </div>
+
+  <!-- ===== MEMORY ===== -->
+  <h2 class="section-title" id="memory">🃏 Character Memory Match</h2>
+  <img class="mascot" src="{{gary}}" alt="Gary">
+  <div class="card">
+    <div class="btnrow" style="justify-content:center;margin-bottom:16px">
+      <button class="btn blue" id="mnew">🔄 New Game</button>
+      <span class="scorebox" id="mmoves">Moves: 0</span>
+      <span class="scorebox" id="mtime">Time: 0s</span>
+      <span class="scorebox" id="mfound">Pairs: 0 / 12</span>
+    </div>
+    <div class="memory" id="mboard"></div>
+    <div class="big-out" id="mout" style="margin-top:16px">Flip two cards to begin.</div>
+  </div>
+
+  <!-- ===== WHO SAID IT ===== -->
+  <h2 class="section-title" id="quote">💬 Who Said It?</h2>
+  <img class="mascot" src="{{squidward}}" alt="Squidward">
+  <div class="card">
+    <div class="btnrow center">
+      <span class="scorebox" id="qs">Streak: 0</span>
+      <span class="scorebox" id="qb">Best: 0</span>
+    </div>
+    <div class="big-out" id="quote-text" style="margin:16px 0">Loading a quote...</div>
+    <div class="avatar-opts" id="quote-opts"></div>
+    <div class="feedback" id="quote-fb"></div>
+    <div class="btnrow"><button class="btn blue" id="qnext">Next Quote ➜</button></div>
+    <p class="hint" style="margin-top:10px">Every quote here was checked against episode transcripts (Wikiquote, SpongeBuddy Mania, SpongePedia, IMDb). Where the source episode is confirmed, it&rsquo;s shown with the answer.</p>
+  </div>
+
+  <!-- ===== RANDOMIZER ===== -->
+  <h2 class="section-title" id="random">🎲 Episode Randomizer</h2>
+  <img class="mascot" src="{{plankton}}" alt="Plankton">
+  <div class="card">
+    <p>Pulled live from the <a href="episodes.html">real episode database</a> — every segment ever aired. The Magic Conch does not take questions.</p>
+    <div class="field" style="margin-top:12px">
+      <select class="txt" id="era">
+        <option value="all">Any Era</option>
+        <option value="classic">Classic (S1–S3)</option>
+        <option value="modern">Golden-ish (S4–S9)</option>
+        <option value="recent">Modern (S10+)</option>
+        <option value="movie">Movies & Specials</option>
+      </select>
+      <button class="btn green" id="spin">🐚 Ask the Conch</button>
+    </div>
+    <div class="big-out" id="epout" style="margin-top:16px">Your destiny awaits.</div>
+  </div>
+
+  <!-- ===== SCRAMBLE ===== -->
+  <h2 class="section-title" id="scramble">🔤 Bikini Bottom Wordscramble</h2>
+  <img class="mascot" src="{{sandy}}" alt="Sandy">
+  <div class="card">
+    <div class="btnrow center">
+      <span class="scorebox" id="sscore">Solved: 0</span>
+      <span class="scorebox" id="stime">⏱ 60s</span>
+      <button class="btn green" id="sstart">▶ Start 60s Round</button>
+    </div>
+    <div class="big-out" id="sword" style="margin:16px 0">Press start!</div>
+    <p class="hint" id="shint" style="text-align:center"></p>
+    <div class="field" style="justify-content:center">
+      <input class="txt" id="sin" placeholder="Type your answer..." autocomplete="off" disabled>
+      <button class="btn blue" id="ssub" disabled>Submit</button>
+      <button class="btn red sm" id="sskip" disabled>Skip</button>
+    </div>
+    <div class="feedback" id="sfb" style="text-align:center"></div>
+  </div>
+</div>
+
+<!--FOOT-->
+
+<script src="js/common.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+
+/* ========== PATTY BUILDER ========== */
+const ING=[
+ {n:'Bottom Bun',c:'#E0A85C'},{n:'Ketchup',c:'#E23B3B'},{n:'Mustard',c:'#F2C230'},
+ {n:'Patty',c:'#7A4A22'},{n:'Cheese',c:'#FFD84D'},{n:'Lettuce',c:'#8CC63F'},
+ {n:'Tomato',c:'#E85C4A'},{n:'Onion',c:'#E9D6E8'},{n:'Pickle',c:'#5FA347'},
+ {n:'Top Bun',c:'#D99845'},{n:'Chum',c:'#7BAA5E'},{n:'Seaweed',c:'#2E7D4F'}
+];
+const PERFECT=['Bottom Bun','Ketchup','Mustard','Patty','Cheese','Lettuce','Tomato','Onion','Pickle','Top Bun'];
+let stack=[];
+ING.forEach(g=>{
+  const b=document.createElement('button');
+  b.className='btn sm';b.textContent=g.n;b.style.background=g.c;
+  b.style.color = ['#7A4A22','#2E7D4F','#E23B3B'].includes(g.c)?'#fff':'#0B2545';
+  b.onclick=()=>{if(stack.length>=14){toast('That is a skyscraper, not a patty.');return;}stack.push(g);drawPatty();};
+  $('ings').appendChild(b);
+});
+function drawPatty(){
+  const s=$('stage');s.innerHTML='';
+  if(!stack.length){s.innerHTML='<div style="opacity:.55;font-weight:800;text-align:center;font-size:1.05rem">🍽️ Empty plate.<br>Tap ingredients below to start stacking.</div>';return;}
+  stack.forEach(g=>{
+    const d=document.createElement('div');d.className='layer';d.textContent=g.n;
+    d.style.background=g.c;
+    d.style.color=['#7A4A22','#2E7D4F','#E23B3B'].includes(g.c)?'#fff':'#3a2a10';
+    s.appendChild(d);
+  });
+}
+$('dump').onclick=()=>{stack=[];drawPatty();$('pattyout').textContent='Empty plate. Sad plate.';};
+$('grade').onclick=()=>{
+  const names=stack.map(x=>x.n);
+  if(!names.length){$('pattyout').textContent='There is literally nothing there, boy.';return;}
+  if(names.includes('Chum')){$('pattyout').innerHTML='🦠 PLANKTON DETECTED.<br>Chum is not food. Zero stars. Get out.';return;}
+  let msg;
+  if(JSON.stringify(names)===JSON.stringify(PERFECT)) msg='👑 THE SECRET FORMULA!<br>Perfect order, perfect patty. Employee of the month. Again.';
+  else{
+    const hits=PERFECT.filter(p=>names.includes(p)).length;
+    const pct=Math.round(hits/PERFECT.length*100);
+    if(pct>=80) msg='🍔 '+pct+'% authentic.<br>Close enough that customers won\'t riot. Nice work, fry cook.';
+    else if(pct>=50) msg='😬 '+pct+'% authentic.<br>Squidward would serve this. That is not a compliment.';
+    else msg='🤢 '+pct+'% authentic.<br>Mr. Krabs is docking your pay. All of it. Which was nothing.';
+  }
+  $('pattyout').innerHTML=msg;
+  toast('Order up!');
+};
+drawPatty();
+
+/* ========== MEMORY ========== */
+const FACES=[
+ {k:'spongebob',n:'SpongeBob',img:'{{spongebob}}'},
+ {k:'patrick',  n:'Patrick',  img:'{{patrick}}'},
+ {k:'squidward',n:'Squidward',img:'{{squidward}}'},
+ {k:'krabs',    n:'Mr. Krabs',img:'{{krabs}}'},
+ {k:'sandy',    n:'Sandy',    img:'{{sandy}}'},
+ {k:'plankton', n:'Plankton', img:'{{plankton}}'},
+ {k:'gary',     n:'Gary',     img:'{{gary}}'},
+ {k:'mrspuff',  n:'Mrs. Puff',img:'{{mrspuff}}'},
+ {k:'patty',    n:'Krabby Patty', emoji:'🍔'},
+ {k:'pineapple',n:'Pineapple',    emoji:'🍍'},
+ {k:'clarinet', n:'Clarinet',     emoji:'🎺'},
+ {k:'jelly',    n:'Jellyfish',    emoji:'🪼'}
+];
+let flipped=[],lock=false,moves=0,found=0,timer=null,secs=0;
+function newMem(){
+  clearInterval(timer);secs=0;moves=0;found=0;flipped=[];lock=false;
+  $('mmoves').textContent='Moves: 0';$('mtime').textContent='Time: 0s';
+  $('mfound').textContent='Pairs: 0 / 12';$('mout').textContent='Flip two cards to begin.';
+  const deck=shuffle(FACES.concat(FACES));
+  const b=$('mboard');b.innerHTML='';
+  deck.forEach(f=>{
+    const c=document.createElement('div');c.className='mcard';c.dataset.f=f.k;
+    c.setAttribute('aria-label',f.n);
+    const face = f.img ? '<img src="'+f.img+'" alt="'+f.n+'">'
+                       : '<span style="font-size:2rem">'+f.emoji+'</span>';
+    c.innerHTML='<div class="inner"><div class="mface mfront">?</div><div class="mface mback">'+face+'</div></div>';
+    c.onclick=()=>flip(c);b.appendChild(c);
+  });
+  timer=setInterval(()=>{secs++;$('mtime').textContent='Time: '+secs+'s';},1000);
+}
+function flip(c){
+  if(lock||c.classList.contains('flipped')||c.classList.contains('done'))return;
+  c.classList.add('flipped');flipped.push(c);
+  if(flipped.length===2){
+    moves++;$('mmoves').textContent='Moves: '+moves;lock=true;
+    const [a,b]=flipped;
+    if(a.dataset.f===b.dataset.f){
+      setTimeout(()=>{a.classList.add('done');b.classList.add('done');flipped=[];lock=false;
+        found++;$('mfound').textContent='Pairs: '+found+' / 12';
+        if(found===12){clearInterval(timer);
+          $('mout').innerHTML='🎉 SWARM CAUGHT!<br>'+moves+' moves in '+secs+' seconds.';toast('You netted them all!');}
+      },420);
+    } else {
+      setTimeout(()=>{a.classList.remove('flipped');b.classList.remove('flipped');flipped=[];lock=false;},780);
+    }
+  }
+}
+$('mnew').onclick=newMem;newMem();
+
+/* ========== WHO SAID IT ========== */
+const CHARS=[
+ {n:'SpongeBob',img:'{{spongebob}}'},{n:'Patrick',img:'{{patrick}}'},
+ {n:'Squidward',img:'{{squidward}}'},{n:'Mr. Krabs',img:'{{krabs}}'},
+ {n:'Plankton',img:'{{plankton}}'},{n:'Sandy',img:'{{sandy}}'},
+ {n:'Mrs. Puff',img:'{{mrspuff}}'},{n:'Gary',img:'{{gary}}'}
+];
+const CIMG=Object.fromEntries(CHARS.map(c=>[c.n,c.img]));
+const QUOTES=[
+ // ---- SpongeBob ----
+ {q:"I'm ready! I'm ready! I'm ready!",w:'SpongeBob',e:'Help Wanted'},
+ {q:"You don't need a license to drive a sandwich.",w:'SpongeBob',e:'The SpongeBob SquarePants Movie'},
+ {q:"This isn't your average everyday darkness. This is... advanced darkness.",w:'SpongeBob'},
+ {q:"The Krusty Krab Pizza is the pizza for you and me!",w:'SpongeBob'},
+ {q:"Remember, licking doorknobs is illegal on other planets!",w:'SpongeBob'},
+ {q:"It is no secret that the best thing about a secret is telling someone else your secret, thereby adding another secret to your secret collection of secrets. Secretly.",w:'SpongeBob'},
+ {q:"Squidward, I used your clarinet to unclog my toilet!",w:'SpongeBob'},
+ {q:"Well, what about aggressively nice people?",w:'SpongeBob',e:'Walking Small'},
+ // ---- Patrick ----
+ {q:"Is mayonnaise an instrument?",w:'Patrick',e:'Band Geeks'},
+ {q:"The inner machinations of my mind are an enigma.",w:'Patrick'},
+ {q:"I can't see my forehead!",w:'Patrick'},
+ {q:"No, this is Patrick!",w:'Patrick',e:'Big Pink Loser'},
+ {q:"Once upon a time, there was an ugly barnacle. He was so ugly that everyone died. The end.",w:'Patrick'},
+ {q:"I wumbo, you wumbo, he she we wumbo. Wumboing, wumbology, the study of wumbo!",w:'Patrick'},
+ {q:"Are you Squidward? ...That's okay, take your time.",w:'Patrick',e:'Squidville'},
+ {q:"Just how stupid are you? ...It varies.",w:'Patrick'},
+ {q:"Finland!",w:'Patrick'},
+ // ---- Squidward ----
+ {q:"Future! Future! Future!",w:'Squidward',e:'SB-129'},
+ {q:"Are you gonna order something, or just make friends with the paneling?",w:'Squidward',e:'Krusty Krab Training Video'},
+ {q:"Patrick, go be stupid somewhere else.",w:'Squidward',e:'Krusty Krab Training Video'},
+ {q:"No, Patrick, horseradish is not an instrument either.",w:'Squidward',e:'Band Geeks'},
+ {q:"Why don't you ask CowBob RanchPants and his faithful companion Sir Eats-a-Lot?",w:'Squidward',e:'My Pretty Seahorse'},
+ {q:"He took off his pants... I'll give him eleven minutes.",w:'Squidward',e:'Nature Pants'},
+ {q:"My sanity, my dignity, my self-respect, my lunch.",w:'Squidward',e:'Christmas Who?'},
+ {q:"Oh, why must every eleven minutes of my life be filled with misery?",w:'Squidward'},
+ {q:"I hate all of you.",w:'Squidward',e:'Karate Choppers'},
+ // ---- Mr. Krabs ----
+ {q:"Do you smell it? That smell. A kind of smelly smell. The smelly smell that smells... smelly.",w:'Mr. Krabs',e:'Help Wanted'},
+ {q:"I'll be in me quarters, countin' up the booty.",w:'Mr. Krabs',e:'Help Wanted'},
+ {q:"I love money-ay!",w:'Mr. Krabs',e:'Karate Choppers'},
+ {q:"Hmm... a five-letter word for happiness... money.",w:'Mr. Krabs'},
+ {q:"Well, hurry it up, lad! We can't squat like this forever!",w:'Mr. Krabs',e:'Texas'},
+ // ---- Plankton ----
+ {q:"F is for fire that burns down the whole town! U is for uranium... bombs! N is for no survivors!",w:'Plankton',e:'F.U.N.'},
+ {q:"You see how wonderful life is... when you're maniacal?",w:'Plankton',e:'Walking Small'},
+ {q:"Surrender that ice cream cone, or every waking moment for you will become a swirling torrent of pain and misery!",w:'Plankton',e:'Walking Small'},
+ {q:"Nice guys finish last. Only aggressive people conquer the world!",w:'Plankton',e:'Walking Small'},
+ {q:"Goodbye everyone, I'll remember you all in therapy.",w:'Plankton',e:'The SpongeBob SquarePants Movie'},
+ // ---- Sandy ----
+ {q:"Y'all better apologize, or I'll be on you like ugly on an ape!",w:'Sandy',e:'Texas'},
+ {q:"Home isn't about barbecues or pecan pies. Home is where you're surrounded by critters that care about ya.",w:'Sandy',e:'Texas'},
+ {q:"Tell that to your mama, Squidward!",w:'Sandy'},
+ {q:"I'll give him a week.",w:'Sandy',e:'Nature Pants'},
+ // ---- Mrs. Puff ----
+ {q:"Oh, Neptune. Another year with him! Barnacles! Dirty barnacles!",w:'Mrs. Puff',e:'No Free Rides'},
+ {q:"You don't understand. SpongeBob is unteachable.",w:'Mrs. Puff',e:"Mrs. Puff, You're Fired"},
+ {q:"It's so simple, only ten words! What I learned in boating school is blankety, blankety, BLANK!",w:'Mrs. Puff',e:'No Free Rides'},
+ // ---- Gary ----
+ {q:"Meow.",w:'Gary'}
+];
+let streak=0,best=+(store.get('sb-quote-best')||0),qAns=false;
+$('qb').textContent='Best: '+best;
+function newQuote(){
+  qAns=false;$('quote-fb').textContent='';
+  const q=pick(QUOTES);
+  $('quote-text').textContent='"'+q.q+'"';
+  const wrong=shuffle(CHARS.map(c=>c.n).filter(c=>c!==q.w)).slice(0,3);
+  const opts=shuffle(wrong.concat([q.w]));
+  const box=$('quote-opts');box.innerHTML='';
+  opts.forEach(o=>{
+    const b=document.createElement('button');b.className='avbtn';b.dataset.n=o;
+    b.innerHTML='<img src="'+CIMG[o]+'" alt=""><span></span>';
+    b.querySelector('span').textContent=o;
+    b.onclick=()=>{
+      if(qAns)return;qAns=true;
+      document.querySelectorAll('#quote-opts .avbtn').forEach(x=>{x.disabled=true;if(x.dataset.n===q.w)x.classList.add('correct');});
+      if(o===q.w){streak++;$('quote-fb').textContent='✅ Correct!'+(q.e?' — from "'+q.e+'"':'');$('quote-fb').className='feedback good';
+        if(streak>best){best=streak;store.set('sb-quote-best',best);$('qb').textContent='Best: '+best;toast('New best streak!');}}
+      else{b.classList.add('wrong');$('quote-fb').textContent='❌ That was '+q.w+(q.e?' — from "'+q.e+'"':'.');$('quote-fb').className='feedback bad';streak=0;}
+      $('qs').textContent='Streak: '+streak;
+    };
+    box.appendChild(b);
+  });
+}
+$('qnext').onclick=newQuote;newQuote();
+
+/* ========== EPISODE RANDOMIZER ========== */
+const ALL_EPS = /*EPISODES*/[];
+const EPS={
+  classic: ALL_EPS.filter(e=>e[0]<=3).map(e=>e[2]),
+  modern : ALL_EPS.filter(e=>e[0]>3 && e[0]<=9).map(e=>e[2]),
+  recent : ALL_EPS.filter(e=>e[0]>9).map(e=>e[2]),
+  movie  : ['The SpongeBob SquarePants Movie','The SpongeBob Movie: Sponge Out of Water',
+            'The SpongeBob Movie: Sponge on the Run','Saving Bikini Bottom: The Sandy Cheeks Movie',
+            'Plankton: The Movie','The SpongeBob Movie: Search for SquarePants',
+            "SpongeBob's Truth or Square",'Atlantis SquarePantis',"SpongeBob's Big Birthday Blowout",
+            'The Legend of Boo-Kini Bottom']
+};
+$('spin').onclick=()=>{
+  const e=$('era').value;
+  const pool = e==='all'? EPS.classic.concat(EPS.modern,EPS.recent,EPS.movie) : EPS[e];
+  const out=$('epout');
+  let n=0;
+  const int=setInterval(()=>{out.textContent='🐚 '+pick(pool);n++;
+    if(n>13){clearInterval(int);
+      out.innerHTML='🎬 TONIGHT YOU WATCH:<br><span style="color:var(--sb-red)">'+pick(pool)+'</span>';
+      toast('The conch has spoken.');}
+  },80);
+};
+
+/* ========== WORD SCRAMBLE ========== */
+const WORDS=[
+ {w:'KRABBY PATTY',h:'The secret is in the formula'},{w:'BIKINI BOTTOM',h:'The city itself'},
+ {w:'SQUIDWARD',h:'Plays clarinet, hates joy'},{w:'PINEAPPLE',h:'Under the sea'},
+ {w:'JELLYFISH',h:'Catch them with a net'},{w:'CHUM BUCKET',h:'Zero customers, all time'},
+ {w:'SANDY CHEEKS',h:'Texas, in a bubble helmet'},{w:'MERMAID MAN',h:'EEEVIL!'},
+ {w:'GOO LAGOON',h:'The beach hangout'},{w:'ROCK BOTTOM',h:'Wrong bus stop'},
+ {w:'MAGIC CONCH',h:'All hail'},{w:'BUBBLE BUDDY',h:'He was real'},
+ {w:'FLYING DUTCHMAN',h:'Ghost pirate'},{w:'BARNACLES',h:'A polite curse word'},
+ {w:'PLANKTON',h:'One eye, big dreams'},{w:'BOATING SCHOOL',h:'SpongeBob never passes'}
+];
+let sIdx=null,sScore=0,sLeft=60,sTimer=null;
+function scramble(s){
+  const parts=s.split(' ').map(w=>{
+    let a=w.split(''),o=w;
+    for(let k=0;k<12&&a.join('')===o;k++)a=shuffle(a);
+    return a.join('');
+  });
+  return parts.join(' ');
+}
+function nextWord(){
+  sIdx=pick(WORDS);
+  $('sword').textContent=scramble(sIdx.w);
+  $('shint').textContent='Hint: '+sIdx.h;
+  $('sin').value='';$('sin').focus();
+}
+function endRound(){
+  clearInterval(sTimer);
+  $('sin').disabled=true;$('ssub').disabled=true;$('sskip').disabled=true;
+  $('sword').innerHTML='⏰ TIME! You solved <b>'+sScore+'</b>.';
+  $('shint').textContent='';
+  $('sfb').textContent = sScore>=8?'Sandy-level vocabulary.':sScore>=4?'Solid fry cook brain.':'Patrick would be proud. Barely.';
+  $('sfb').className='feedback good';
+}
+$('sstart').onclick=()=>{
+  sScore=0;sLeft=60;$('sscore').textContent='Solved: 0';$('stime').textContent='⏱ 60s';
+  $('sin').disabled=false;$('ssub').disabled=false;$('sskip').disabled=false;$('sfb').textContent='';
+  nextWord();
+  clearInterval(sTimer);
+  sTimer=setInterval(()=>{sLeft--;$('stime').textContent='⏱ '+sLeft+'s';if(sLeft<=0)endRound();},1000);
+};
+function submitWord(){
+  if($('sin').disabled)return;
+  const v=$('sin').value.trim().toUpperCase().replace(/\s+/g,' ');
+  if(v===sIdx.w){sScore++;$('sscore').textContent='Solved: '+sScore;
+    $('sfb').textContent='✅ Got it!';$('sfb').className='feedback good';nextWord();}
+  else{$('sfb').textContent='❌ Not quite — keep trying!';$('sfb').className='feedback bad';}
+}
+$('ssub').onclick=submitWord;
+$('sin').addEventListener('keydown',e=>{if(e.key==='Enter')submitWord();});
+$('sskip').onclick=()=>{$('sfb').textContent='Skipped: '+sIdx.w;$('sfb').className='feedback bad';nextWord();};
+</script>
+</body>
+</html>

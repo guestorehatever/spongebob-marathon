@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1F5FBF">
+<title>Episode Guide — SpongeBob Marathon on GioTV</title>
+<link rel="icon" href="{{LOGO}}">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!--NAV-->
+
+<div class="wrap">
+  <h1 class="title-xl">Episode Guide</h1>
+  <p class="section-sub" id="tagline">Every single segment ever made. Search it, filter it, argue about it.</p>
+
+  <div class="card">
+    <div class="epcontrols">
+      <input class="txt" id="q" type="search" placeholder="🔎 Search episode titles…" autocomplete="off">
+      <select class="txt" id="season"><option value="">All Seasons</option></select>
+      <select class="txt" id="sort">
+        <option value="air">Sort: Air date</option>
+        <option value="az">Sort: A → Z</option>
+        <option value="za">Sort: Z → A</option>
+        <option value="rand">Sort: Shuffle</option>
+      </select>
+    </div>
+    <div class="btnrow">
+      <span class="scorebox" id="count">—</span>
+      <button class="btn green sm" id="lucky">🎲 I'm Feeling Lucky</button>
+      <button class="btn red sm" id="reset">Reset</button>
+    </div>
+  </div>
+
+  <div class="eplist" id="list"></div>
+  <div class="pager">
+    <button class="btn blue" id="more">Load 100 More ⬇</button>
+  </div>
+
+  <h2 class="section-title">By The Numbers</h2>
+  <div class="grid g4" id="stats"></div>
+
+  <div class="card" style="margin-top:24px;text-align:center">
+    <img src="{{spongebob}}" alt="SpongeBob" style="height:120px">
+    <h3 style="font-size:1.6rem">Watch Along All September</h3>
+    <p>Every one of these could show up during the marathon. Probably not all of them. Definitely some of them.</p>
+    <div class="btnrow center">
+      <a class="btn blue" href="bingo.html">🎟️ Bingo</a>
+      <a class="btn green" href="trivia.html">🧠 Trivia</a>
+    </div>
+  </div>
+</div>
+
+<!--FOOT-->
+<script src="js/common.js"></script>
+<script>
+/* [season, episodeInSeason, title, airdate] — parsed from Wikipedia */
+const EPS = /*EPISODES*/[];
+const $=id=>document.getElementById(id);
+
+// season dropdown
+const seasons=[...new Set(EPS.map(e=>e[0]))].sort((a,b)=>a-b);
+seasons.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent='Season '+s;$('season').appendChild(o);});
+
+$('tagline').textContent = EPS.length+' segments across '+seasons.length+' seasons. Search it, filter it, argue about it.';
+
+let shown=100, view=[];
+function fmt(d){
+  if(!d) return '';
+  const p=d.split('-'); if(p.length!==3) return d;
+  const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return M[+p[1]-1]+' '+(+p[2])+', '+p[0];
+}
+function compute(){
+  const q=$('q').value.trim().toLowerCase();
+  const s=$('season').value;
+  view=EPS.filter(e=>(!s||e[0]==s)&&(!q||e[2].toLowerCase().includes(q)));
+  const so=$('sort').value;
+  if(so==='az') view.sort((a,b)=>a[2].localeCompare(b[2]));
+  else if(so==='za') view.sort((a,b)=>b[2].localeCompare(a[2]));
+  else if(so==='rand') view=shuffle(view);
+  else view.sort((a,b)=>(a[3]||'').localeCompare(b[3]||'')||a[0]-b[0]);
+}
+function render(){
+  const box=$('list');box.innerHTML='';
+  view.slice(0,shown).forEach(e=>{
+    const d=document.createElement('div');d.className='ep';
+    d.innerHTML='<span class="se">S'+String(e[0]).padStart(2,'0')+(e[1]?' E'+String(e[1]).padStart(2,'0'):'')+'</span>'+
+                '<span class="ti"></span><span class="dt">'+fmt(e[3])+'</span>';
+    d.querySelector('.ti').textContent=e[2];
+    box.appendChild(d);
+  });
+  $('count').textContent=view.length+' episode'+(view.length===1?'':'s');
+  $('more').style.display = view.length>shown ? 'inline-flex' : 'none';
+  $('more').textContent='Load '+Math.min(100,view.length-shown)+' More ⬇';
+}
+function refresh(){shown=100;compute();render();}
+['q','season','sort'].forEach(id=>{
+  $(id).addEventListener('input',refresh);
+  $(id).addEventListener('change',refresh);
+});
+$('more').onclick=()=>{shown+=100;render();};
+$('reset').onclick=()=>{$('q').value='';$('season').value='';$('sort').value='air';refresh();toast('Filters cleared.');};
+$('lucky').onclick=()=>{
+  const e=pick(EPS);
+  $('q').value=e[2];$('season').value='';refresh();
+  toast('Tonight: '+e[2]);
+  window.scrollTo({top:$('list').offsetTop-90,behavior:'smooth'});
+};
+refresh();
+
+// stats
+const byS={};EPS.forEach(e=>byS[e[0]]=(byS[e[0]]||0)+1);
+const biggest=Object.entries(byS).sort((a,b)=>b[1]-a[1])[0];
+const first=EPS.reduce((a,b)=>(a[3]&&a[3]<b[3])?a:b);
+const last=EPS.reduce((a,b)=>(a[3]>b[3])?a:b);
+const longest=EPS.reduce((a,b)=>a[2].length>b[2].length?a:b);
+[['🎬',EPS.length,'Total segments'],
+ ['📚',seasons.length,'Seasons'],
+ ['🏆','S'+biggest[0],biggest[1]+' segments — biggest season'],
+ ['🥇',fmt(first[3]),'"'+first[2]+'" aired first'],
+ ['🆕',fmt(last[3]),'Most recent: "'+last[2]+'"'],
+ ['📝',longest[2].length+' chars','Longest title: "'+longest[2]+'"'],
+ ['⏱️',Math.round(EPS.length*11/60)+' hrs','Roughly, back to back'],
+ ['🍔','∞','Krabby Patties served']
+].forEach(([ic,big,lab])=>{
+  const d=document.createElement('div');d.className='card';
+  d.innerHTML='<div style="font-size:1.8rem">'+ic+'</div>'+
+    '<h3 style="font-size:1.5rem;margin:2px 0 4px"></h3><p style="font-size:.85rem;margin:0"></p>';
+  d.querySelector('h3').textContent=big;
+  d.querySelector('p').textContent=lab;
+  $('stats').appendChild(d);
+});
+</script>
+</body>
+</html>

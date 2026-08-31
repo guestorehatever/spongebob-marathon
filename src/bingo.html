@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1F5FBF">
+<title>Marathon Bingo — SpongeBob Marathon on GioTV</title>
+<link rel="icon" href="{{LOGO}}">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!--NAV-->
+
+<div class="wrap">
+  <h1 class="title-xl" style="text-align:center;margin-top:26px">Marathon Bingo</h1>
+  <p class="section-sub">Watch the marathon. Tap a square when it happens. Yell "BARNACLES!" when you win.</p>
+  <img class="mascot" src="{{mrspuff}}" alt="Mrs. Puff">
+
+  <div class="card" style="max-width:760px;margin:0 auto">
+    <div class="btnrow center">
+      <button class="btn green" id="new">🎲 New Card</button>
+      <button class="btn red" id="clear">🧼 Clear Marks</button>
+      <button class="btn blue" id="print">🖨️ Print Card</button>
+      <span class="scorebox" id="count">Marked: 1</span>
+    </div>
+    <p class="hint" style="text-align:center;margin:12px 0 0">Your card + marks save automatically in this browser.</p>
+  </div>
+
+  <div style="margin:26px 0">
+    <div class="bingo-head"><div>B</div><div>I</div><div>N</div><div>G</div><div>O</div></div>
+    <div class="bingo" id="board"></div>
+  </div>
+
+  <div class="card" style="max-width:760px;margin:0 auto 30px">
+    <h3>How To Win</h3>
+    <p><b>Line Bingo:</b> 5 in a row — across, down, or diagonal.<br>
+    <b>Four Corners:</b> all four corner squares.<br>
+    <b>Blackout:</b> the whole card. Reserved for people with no plans all September.</p>
+    <div class="btnrow"><a class="btn blue" href="games.html">More Games ➜</a></div>
+  </div>
+</div>
+
+<!--FOOT-->
+
+<script src="js/common.js"></script>
+<script>
+const SQUARES=[
+ "SpongeBob does the laugh","Squidward slams his door","Patrick says something dumb",
+ "Mr. Krabs smells money","Plankton's plan fails","Gary meows",
+ "Sandy shows off karate","Someone yells MY LEG!","Krabby Patty close-up",
+ "SpongeBob cries a river","Squidward plays clarinet","A bubble transition",
+ "Mrs. Puff panics","Pearl whines about being a teen","Patrick's rock opens",
+ "Someone eats a Krabby Patty","The Chum Bucket is empty","Plankton gets flicked away",
+ "SpongeBob says 'I'm ready'","A fish extra screams","Squidward daydreams",
+ "Karen roasts Plankton","Larry flexes","SpongeBob jellyfishes",
+ "Mr. Krabs charges for something free","Nautical nonsense intro","Someone gets soaked",
+ "A dramatic sunset shot","SpongeBob makes a bubble","Patrick eats something weird",
+ "Squidward gets injured","A giant close-up on eyes","Mermaid Man cameo",
+ "SpongeBob runs in place","A pun about the sea","Someone says 'Barnacles!'",
+ "The Krusty Krab is packed","SpongeBob flips 100 patties","Plankton shrinks in size",
+ "Fish crowd forms instantly","An imagination rainbow","Squidward's eye twitches",
+ "Someone falls off a cliff","A french narrator card","SpongeBob salutes"
+];
+
+const board=document.getElementById('board');
+const KEY='sb-bingo-v1';
+
+function newCard(){
+  const cells=shuffle(SQUARES).slice(0,24);
+  cells.splice(12,0,'⭐ FREE ⭐');
+  const marks=Array(25).fill(false); marks[12]=true;
+  save({cells,marks}); draw();
+  toast('Fresh card, fresh start!');
+}
+function save(s){store.set(KEY,JSON.stringify(s));}
+function load(){try{return JSON.parse(store.get(KEY));}catch(e){return null;}}
+
+function draw(){
+  const s=load(); if(!s){newCard();return;}
+  board.innerHTML='';
+  s.cells.forEach((txt,idx)=>{
+    const d=document.createElement('div');
+    d.className='cell'+(idx===12?' free':'')+(s.marks[idx]?' marked':'');
+    d.textContent=txt;
+    d.onclick=()=>{
+      const st=load(); st.marks[idx]=!st.marks[idx]; save(st); draw(); check();
+    };
+    board.appendChild(d);
+  });
+  document.getElementById('count').textContent='Marked: '+s.marks.filter(Boolean).length;
+}
+
+function check(){
+  const m=load().marks;
+  const lines=[];
+  for(let r=0;r<5;r++)lines.push([0,1,2,3,4].map(c=>r*5+c));
+  for(let c=0;c<5;c++)lines.push([0,1,2,3,4].map(r=>r*5+c));
+  lines.push([0,6,12,18,24],[4,8,12,16,20]);
+  const corners=[0,4,20,24];
+  if(m.every(Boolean)) toast('🏆 BLACKOUT! Absolute legend.');
+  else if(lines.some(l=>l.every(i=>m[i]))) toast('🎉 BINGO! Yell it out loud!');
+  else if(corners.every(i=>m[i])) toast('🌟 FOUR CORNERS!');
+}
+
+document.getElementById('new').onclick=newCard;
+document.getElementById('clear').onclick=()=>{
+  const s=load(); s.marks=Array(25).fill(false); s.marks[12]=true; save(s); draw();
+  toast('Card wiped clean.');
+};
+document.getElementById('print').onclick=()=>{try{window.print();}catch(e){toast('Printing is blocked in this preview.');}};
+draw();
+</script>
+</body>
+</html>

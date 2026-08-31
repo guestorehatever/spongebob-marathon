@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1F5FBF">
+<title>Bikini Bottom Trivia — SpongeBob Marathon on GioTV</title>
+<link rel="icon" href="{{LOGO}}">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!--NAV-->
+
+<div class="wrap">
+  <h1 class="title-xl" style="text-align:center;margin-top:26px">Bikini Bottom Trivia</h1>
+  <p class="section-sub">Pick a difficulty. Answer fast. Don't embarrass yourself in front of Sandy.</p>
+  <img class="mascot" src="{{sandy}}" alt="Sandy Cheeks">
+
+  <div class="quiz-shell">
+    <div class="card" id="start-screen">
+      <h3 style="text-align:center;font-size:1.7rem">Choose Your Challenge</h3>
+      <div class="btnrow center">
+        <button class="btn green" data-diff="easy">🧽 Easy — Bubble Buddy</button>
+        <button class="btn blue" data-diff="medium">🦀 Medium — Fry Cook</button>
+        <button class="btn red" data-diff="hard">🥋 Hard — Superfan</button>
+      </div>
+      <div class="btnrow center">
+        <button class="btn" data-diff="all">🌊 ALL 27 QUESTIONS</button>
+      </div>
+      <p class="hint" style="text-align:center;margin-top:14px">Questions are shuffled every round, so no cheating with muscle memory.</p>
+    </div>
+
+    <div class="card" id="quiz" style="display:none">
+      <div class="qmeta"><span id="qnum">Q 1 / 10</span><span id="qscore">Score: 0</span></div>
+      <div class="qbar"><i id="qfill"></i></div>
+      <div class="qtext" id="qtext"></div>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="btnrow"><button class="btn blue" id="next" style="display:none">Next ➜</button></div>
+    </div>
+
+    <div class="card" id="result" style="display:none;text-align:center">
+      <img id="rimg" alt="" hidden style="height:170px;width:auto;max-width:100%;filter:drop-shadow(0 8px 6px rgba(0,0,0,.3))">
+      <h3 style="font-size:1.9rem" id="rank"></h3>
+      <div class="big-out" id="rmsg"></div>
+      <div class="btnrow center">
+        <button class="btn green" id="again">Play Again</button>
+        <a class="btn blue" href="bingo.html">Try Bingo ➜</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--FOOT-->
+
+<script src="js/common.js"></script>
+<script>
+const BANK = [
+ // EASY
+ {d:'easy',q:"What does SpongeBob live in?",a:["A pineapple","A coral cave","A tiki head","A submarine"],c:0,f:"A pineapple under the sea, obviously."},
+ {d:'easy',q:"Where does SpongeBob work?",a:["The Chum Bucket","The Krusty Krab","Barg'N-Mart","Goo Lagoon Snack Bar"],c:1,f:"Fry cook of the month, 374 times running."},
+ {d:'easy',q:"What kind of animal is Patrick Star?",a:["A sea slug","A starfish","A crab","A jellyfish"],c:1,f:"A starfish who lives under a rock. Literally."},
+ {d:'easy',q:"What instrument does Squidward play (badly)?",a:["Trumpet","Clarinet","Tuba","Accordion"],c:1,f:"The clarinet. The neighbors have suffered enough."},
+ {d:'easy',q:"What is Sandy Cheeks?",a:["A squirrel","A sea otter","A hamster","A beaver"],c:0,f:"A land squirrel from Texas, in a diving suit."},
+ {d:'easy',q:"Who owns the Chum Bucket?",a:["Mr. Krabs","Plankton","Squidward","Man Ray"],c:1,f:"Plankton — and business is not booming."},
+ {d:'easy',q:"What is the name of SpongeBob's pet snail?",a:["Larry","Gary","Harold","Barnacle Boy"],c:1,f:"Gary. And Gary meows."},
+ {d:'easy',q:"What is Mr. Krabs' daughter's name?",a:["Pearl","Shelly","Coral","Mindy"],c:0,f:"Pearl — a whale, somehow."},
+ {d:'easy',q:"What is SpongeBob's boating school instructor's name?",a:["Mrs. Puff","Mrs. Bubbles","Miss Shell","Mrs. Krabs"],c:0,f:"Mrs. Puff, who has never known peace."},
+ // MEDIUM
+ {d:'medium',q:"What are the two superheroes SpongeBob and Patrick idolize?",a:["Mermaid Man & Barnacle Boy","Captain Krill & Fin Boy","The Quickster & Elastic Waistband","Sea Man & Reef Kid"],c:0,f:"Mermaid Man and Barnacle Boy! EEEEEVIL!"},
+ {d:'medium',q:"Who is the muscle-bound lobster lifeguard at Goo Lagoon?",a:["Larry the Lobster","Fred","Tom","Harold"],c:0,f:"Larry the Lobster — a lobster, not a fish. Permanently at Goo Lagoon."},
+ {d:'medium',q:"What does SpongeBob's driving test always end in?",a:["A perfect score","A crash","A tie","Rain delay"],c:1,f:"A crash. Every single time."},
+ {d:'medium',q:"What is the name of the restaurant rivalry episode where Plankton makes a giant robot?",a:["Imitation Krabs","F.U.N.","Plankton!","Welcome to the Chum Bucket"],c:0,f:"'Imitation Krabs' — the robot Krabs classic."},
+ {d:'medium',q:"What word does Patrick famously suggest is the answer to everything?",a:["Wumbo","Chum","Barnacles","Tartar"],c:0,f:"I wumbo, you wumbo, he/she/me wumbo."},
+ {d:'medium',q:"What is the Flying Dutchman?",a:["A ghost pirate","A sea monster","A boat","A restaurant"],c:0,f:"A ghost pirate with a serious temper."},
+ {d:'medium',q:"What is inside SpongeBob's head when he panics?",a:["Tiny office workers on fire","Jellyfish","Bubbles","A clarinet"],c:0,f:"Little brain-men running around screaming."},
+ {d:'medium',q:"What does Squidward's house look like?",a:["A tiki head","An Easter Island moai","A pineapple","A rock"],c:1,f:"An Easter Island moai head."},
+ {d:'medium',q:"Who is Man Ray's arch nemesis?",a:["Mermaid Man","Plankton","Larry","Bubble Bass"],c:0,f:"Mermaid Man — and the Tickle Belt."},
+ // HARD
+ {d:'hard',q:"How many pickles did Bubble Bass claim were missing from his Krabby Patty?",a:["None — he hid them under his tongue","Two","Five","Six"],c:0,f:"He hid it under his tongue the whole time. Monster."},
+ {d:'hard',q:"In \u201cMy Pretty Seahorse\u201d, what does SpongeBob name his seahorse?",a:["Mystery","Shelly","Sandy Jr.","Gary II"],c:0,f:"Mystery — from 'My Pretty Seahorse'."},
+ {d:'hard',q:"What is Squidward's middle name?",a:["Quincy","Q.","Tentacles","J."],c:1,f:"Squidward Q. Tentacles."},
+ {d:'hard',q:"What band plays the Bubble Bowl halftime show?",a:["SpongeBob & Patrick","The Bikini Bottom Boys","Sailor Mouth","The Sponge Squad"],c:0,f:"SpongeBob and Patrick shred 'Sweet Victory'."},
+ {d:'hard',q:"What does Plankton name his computer wife?",a:["Karen","Kathy","Carol","Kira"],c:0,f:"Karen. She's smarter than he is."},
+ {d:'hard',q:"What town do SpongeBob and Patrick get stranded in after taking the wrong bus?",a:["Rock Bottom","New Kelp City","Bikini Bottom Heights","Tentacle Acres"],c:0,f:"Rock Bottom. *tongue noise*"},
+ {d:'hard',q:"In \u201cSurvival of the Idiots\u201d, what does Squidward do that summons the sea bear?",a:["Playing the clarinet badly","Wearing a sombrero","Eating chocolate","Yelling 'Sea bear!'"],c:1,f:"Clown wig and sombrero. Big mistake."},
+ {d:'hard',q:"In the first movie, what does Plankton steal to frame Mr. Krabs?",a:["King Neptune's crown","The secret formula","A Krabby Patty","Gary"],c:0,f:"He frames Mr. Krabs for stealing Neptune's crown."},
+ {d:'hard',q:"SpongeBob blows a bubble and befriends it. What does he name it?",a:["Bubble Buddy","Bubble Bass","Bubbles","Buddy Bubs"],c:0,f:"Bubble Buddy — and the whole town nearly rioted over him."}
+];
+
+const RANKS=[
+ {min:.95,t:"👑 EMPLOYEE OF THE MILLENNIUM",img:'{{spongebob}}',m:"Mr. Krabs is crying. Actual tears. That's a perfect fry-cook brain."},
+ {min:.8,t:"🍔 SENIOR FRY COOK",img:'{{krabs}}',m:"You know your patties. Squidward is quietly impressed and will never admit it."},
+ {min:.6,t:"🧽 SOLID BIKINI BOTTOMER",img:'{{sandy}}',m:"Respectable! You'd survive at least three days in Rock Bottom."},
+ {min:.4,t:"🪨 PATRICK-LEVEL",img:'{{patrick}}',m:"You tried. That's the important part. Is mayonnaise an instrument?"},
+ {min:0,t:"🦠 PLANKTON TIER",img:'{{plankton}}',m:"You got the formula wrong AGAIN. Rewatch the marathon immediately."}
+];
+
+let qs=[],i=0,score=0,answered=false;
+const $=id=>document.getElementById(id);
+
+document.querySelectorAll('[data-diff]').forEach(b=>b.onclick=()=>{
+  const d=b.dataset.diff;
+  const pool = d==='all'?BANK:BANK.filter(x=>x.d===d);
+  qs=shuffle(pool); i=0; score=0;
+  $('start-screen').style.display='none';
+  $('result').style.display='none';
+  $('quiz').style.display='block';
+  render();
+});
+
+function render(){
+  answered=false;
+  const q=qs[i];
+  $('qnum').textContent='Q '+(i+1)+' / '+qs.length;
+  $('qscore').textContent='Score: '+score;
+  $('qfill').style.width=(i/qs.length*100)+'%';
+  $('qtext').textContent=q.q;
+  $('feedback').textContent='';$('feedback').className='feedback';
+  $('next').style.display='none';
+  const box=$('answers');box.innerHTML='';
+  const opts=q.a.map((t,idx)=>({t,idx}));
+  shuffle(opts).forEach(o=>{
+    const btn=document.createElement('button');
+    btn.className='ans';btn.textContent=o.t;
+    btn.onclick=()=>choose(btn,o.idx===q.c,q);
+    box.appendChild(btn);
+  });
+}
+
+function choose(btn,right,q){
+  if(answered)return; answered=true;
+  document.querySelectorAll('.ans').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===q.a[q.c])b.classList.add('correct');
+  });
+  if(right){score++;$('feedback').textContent='✅ '+q.f;$('feedback').className='feedback good';toast('Nice one!');}
+  else{btn.classList.add('wrong');$('feedback').textContent='❌ '+q.f;$('feedback').className='feedback bad';}
+  $('qscore').textContent='Score: '+score;
+  $('next').style.display='inline-block';
+  $('next').textContent = (i===qs.length-1)?'See Results ➜':'Next ➜';
+}
+
+$('next').onclick=()=>{
+  i++;
+  if(i<qs.length)render();
+  else finish();
+};
+
+function finish(){
+  $('quiz').style.display='none';$('result').style.display='block';
+  const pct=score/qs.length;
+  const r=RANKS.find(x=>pct>=x.min);
+  $('rank').textContent=r.t;$('rimg').src=r.img;$('rimg').hidden=false;
+  $('rmsg').innerHTML='You scored <b>'+score+' / '+qs.length+'</b><br>'+r.m;
+}
+$('again').onclick=()=>{$('result').style.display='none';$('start-screen').style.display='block';};
+</script>
+</body>
+</html>
