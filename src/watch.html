@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Watch Live &middot; SpongeBob Marathon &middot; GioTV</title>
+<meta name="description" content="Watch the GioTV SpongeBob SquarePants Marathon live, 24/7 from Bikini Bottom.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!--NAV-->
+
+<div class="wrap">
+  <h1 class="section-title">Watch Live</h1>
+  <p class="section-sub">24/7 from Bikini Bottom. No remote required.</p>
+
+  <!-- ===== THE TV SET ===== -->
+  <div class="tvset">
+    <div class="tvant" aria-hidden="true"><span class="tvant-l"></span><span class="tvant-r"></span><span class="tvant-k"></span></div>
+
+    <div class="tvbody">
+      <div class="tvscreen-out">
+        <div class="tvscreen off" id="screen">
+          <video id="v" class="tvvideo" playsinline preload="none"
+                 poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"></video>
+
+          <!-- analogue snow -->
+          <div class="tvstatic" id="static" aria-hidden="true"></div>
+          <div class="tvroll" id="roll" aria-hidden="true"></div>
+
+          <!-- OFF: crt collapses to a dot -->
+          <div class="tvover tvover-off" id="ov-off">
+            <div class="crtdot" id="crtdot" aria-hidden="true"></div>
+            <p class="tvover-t sm" id="offtxt">Press Power</p>
+          </div>
+
+          <!-- what the player is doing right now -->
+          <div class="tvbusy" id="busy" hidden>
+            <span class="busyspin" aria-hidden="true"></span><span id="busytxt">Buffering&hellip;</span>
+          </div>
+
+          <!-- tuning -->
+          <div class="tvover" id="ov-load" hidden>
+            <div class="tvspin" aria-hidden="true"></div>
+            <p class="tvover-t sm" id="loadtxt">Finding signal&hellip;</p>
+          </div>
+
+          <!-- NO SIGNAL: static shows through -->
+          <div class="tvover tvover-clear" id="ov-err" hidden>
+            <div class="nosignal">
+              <p class="nosignal-t">No Signal</p>
+              <p class="nosignal-p" id="errmsg">Plankton probably unplugged something.</p>
+            </div>
+            <button class="btn" id="retrybtn">Try Again</button>
+          </div>
+
+          <div class="tvscan" aria-hidden="true"></div>
+          <div class="tvglare" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <!-- ===== CONTROLS ===== -->
+      <div class="tvctl">
+        <button class="tvpower" id="power" aria-label="Turn TV on" aria-pressed="false" title="Power">
+          <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true">
+            <path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
+                  d="M12 3.5v8"/><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
+                  d="M7.2 6.4a7 7 0 1 0 9.6 0"/></svg>
+        </button>
+
+        <button class="tvbtn" id="play" aria-label="Play" disabled><span id="playi"></span></button>
+        <button class="tvbtn" id="mute" aria-label="Mute" disabled><span id="mutei"></span></button>
+
+        <button class="tvbtn" id="pip" aria-label="Picture in picture" title="Picture in picture"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="2.6" y="4.6" width="18.8" height="14.8" rx="2.6" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="11.4" y="11" width="8" height="6.4" rx="1.4" fill="currentColor"/></svg></button>
+
+        <button class="tvbtn fx on" id="fx" aria-label="Turn CRT filter off" aria-pressed="true" title="Retro CRT filter"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="2.6" y="4.4" width="18.8" height="14" rx="2.6" fill="none" stroke="currentColor" stroke-width="2.2"/><path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M5.6 8.2h12.8M5.6 11.4h12.8M5.6 14.6h12.8"/></svg></button>
+
+        <button class="tvbtn" id="full" aria-label="Fullscreen">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor"
+            stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        </button>
+      </div>
+
+      <span id="state" class="vh" aria-live="polite">OFF</span>
+
+      <div class="tvbrand">
+        <span class="tvknob"></span>
+        <span class="tvname">GioTV</span>
+        <span class="tvknob"></span>
+      </div>
+    </div>
+
+    <div class="tvfeet" aria-hidden="true"><span></span><span></span></div>
+  </div>
+
+  <p class="hint">Hit the red power button to switch the set on. Keys: <b>P</b> power, <b>space</b> play/pause, <b>M</b> mute, <b>F</b> fullscreen, <b>C</b> CRT filter, <b>I</b> picture-in-picture.</p>
+
+  <div class="btnrow center">
+    <a class="btn blue" href="episodes.html">&#128218; Episode Guide</a>
+    <a class="btn green" href="games.html">&#127918; Play Games</a>
+    <a class="btn" href="bingo.html">&#127903;&#65039; Bingo Card</a>
+  </div>
+</div>
+
+<!--FOOT-->
+
+<script src="js/common.js"></script>
+<!--HLS-->
+<script>
+(function(){
+  var SRC='https://183.bozztv.com/giatv/giatv-spongebob/spongebob/playlist.m3u8';
+  var v=document.getElementById('v'), hls=null;
+  var screenEl=document.getElementById('screen'),
+      ovOff=document.getElementById('ov-off'), ovL=document.getElementById('ov-load'),
+      ovE=document.getElementById('ov-err'), stat=document.getElementById('static'),
+      roll=document.getElementById('roll'),
+      errmsg=document.getElementById('errmsg'), stateEl=document.getElementById('state');
+
+  var I_PLAY ='<svg viewBox="0 0 24 24" width="19" height="19"><path fill="currentColor" d="M7 4l13 8-13 8z"/></svg>',
+      I_PAUSE='<svg viewBox="0 0 24 24" width="19" height="19"><path fill="currentColor" d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>',
+      I_SPK  ='<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
+      I_MUTE ='<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 9.5l5 5m0-5l-5 5"/></svg>';
+
+  var pip=document.getElementById('pip');
+  var power=document.getElementById('power'), play=document.getElementById('play'),
+      playi=document.getElementById('playi'), mute=document.getElementById('mute'),
+      mutei=document.getElementById('mutei');
+
+  var on=false, mediaTries=0, snowTimer=null;
+
+  /* ---------- screen states ---------- */
+  function setState(s){ stateEl.textContent=s; }   /* screen-reader only, keeps its .vh class */
+  function snow(level){                       // 0 = none, .5 = light, 1 = full blizzard
+    stat.style.opacity=level;
+    roll.style.opacity=level?0.5:0;
+    stat.classList.toggle('hard', level>=1);
+  }
+  function showOverlay(el){
+    [ovOff,ovL,ovE].forEach(function(o){ o.hidden=(o!==el); });
+  }
+
+  function toOff(){
+    on=false; stopStall(); clearInterval(snowTimer);
+    try{ v.pause(); }catch(e){}
+    if(hls){ try{hls.destroy();}catch(e){} hls=null; }
+    v.removeAttribute('src'); try{ v.load(); }catch(e){}
+    screenEl.classList.add('off'); screenEl.classList.remove('nosig');
+    snow(0); busyOff(); showOverlay(ovOff);
+    document.getElementById('offtxt').textContent='Press Power';
+    power.setAttribute('aria-pressed','false'); power.setAttribute('aria-label','Turn TV on');
+    power.classList.remove('on');
+    [play,mute,pip].forEach(function(c){ c.disabled=true; });
+    setState('OFF'); setPlay(false);
+  }
+
+  function toOn(){
+    on=true; screenEl.classList.remove('off'); screenEl.classList.add('warming');
+    setTimeout(function(){ screenEl.classList.remove('warming'); },420);
+    power.setAttribute('aria-pressed','true'); power.setAttribute('aria-label','Turn TV off');
+    power.classList.add('on');
+    [play,mute,pip].forEach(function(c){ c.disabled=false; });
+    v.muted=false; v.volume=1; setVolIcon();
+    tuning(); attach();
+  }
+
+  function tuning(){ showOverlay(ovL); snow(0.55); busyOff(); setState('TUNING'); }
+
+  /* ---------- offline => static ---------- */
+  function noSignal(msg){
+    stopStall(); busyOff();
+    if(hls){ try{hls.destroy();}catch(e){} hls=null; }
+    try{ v.pause(); }catch(e){}
+    errmsg.textContent = msg || '';
+    errmsg.hidden = !msg;
+    screenEl.classList.add('nosig');
+    showOverlay(ovE); snow(1); setState('NO SIGNAL'); setPlay(false);
+  }
+
+  /* ---------- activity / stall detection ----------
+     Any sign of life (a fragment arriving, the clock advancing) resets a 5s
+     timer. If nothing happens for 5 seconds we treat the channel as dead:
+     full static, offline text, no stream frame. */
+  var STALL_MS=5000, stallTimer=null;
+  function activity(){
+    if(!on) return;
+    clearTimeout(stallTimer);
+    stallTimer=setTimeout(function(){
+      if(on) noSignal('');
+    }, STALL_MS);
+  }
+  function stopStall(){ clearTimeout(stallTimer); stallTimer=null; }
+
+  /* One status at a time: while the full tune-in panel is up it carries the
+     text; once we've had a picture, the small corner badge does instead. */
+  function busyOn(t){
+    setState(t);
+    var loading=!document.getElementById('ov-load').hidden;
+    document.getElementById('loadtxt').textContent=t;
+    document.getElementById('busytxt').textContent=t;
+    document.getElementById('busy').hidden = loading;
+  }
+  function busyOff(){ document.getElementById('busy').hidden=true; }
+
+  function attach(){
+    mediaTries=0; activity();
+    if(window.Hls && window.Hls.isSupported()){
+      if(hls){ try{hls.destroy();}catch(e){} }
+      hls=new Hls({
+        /* Measured over 40+ polls: always 4 segments, live window swings
+           23-36s (median ~29s). Sitting on the edge guarantees stalls; going
+           too far back falls off the end of the playlist. Target 14s behind
+           and only correct past 20s, so we stay inside even a 23s window. */
+        lowLatencyMode:false,
+        liveSyncDuration:14,          // ~14s of media buffered ahead of the playhead
+        liveMaxLatencyDuration:20,    // still inside the worst-case 23s window
+        maxLiveSyncPlaybackRate:1.08, // ease back gently instead of seeking
+        maxBufferLength:60,           // seconds of forward buffer to hold
+        maxMaxBufferLength:90,
+        backBufferLength:30,
+        manifestLoadingMaxRetry:4,
+        fragLoadingMaxRetry:6
+      });
+      hls.on(Hls.Events.MANIFEST_LOADING,function(){ busyOn('Finding signal\u2026'); });
+      hls.on(Hls.Events.MANIFEST_PARSED,function(){ busyOn('Tuning in\u2026'); v.play().catch(function(){}); });
+      hls.on(Hls.Events.FRAG_LOADING,function(){ activity(); if(v.paused||v.readyState<3) busyOn('Buffering\u2026'); });
+      hls.on(Hls.Events.FRAG_BUFFERED,function(){ activity(); });
+      hls.loadSource(SRC); hls.attachMedia(v);
+      hls.on(Hls.Events.ERROR,function(evt,d){
+        if(!d.fatal){ if(d.type===Hls.ErrorTypes.NETWORK_ERROR) busyOn('Reconnecting\u2026'); return; }
+        if(d.details==='manifestIncompatibleCodecsError')
+          return noSignal('This browser can\u2019t decode the stream (needs H.264). Try Chrome, Edge, Safari or Firefox.');
+        if(d.type===Hls.ErrorTypes.NETWORK_ERROR){
+          if(d.details===Hls.ErrorDetails.MANIFEST_LOAD_ERROR ||
+             d.details===Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT ||
+             d.details===Hls.ErrorDetails.MANIFEST_PARSING_ERROR)
+            return noSignal('');
+          hls.startLoad();
+        } else if(d.type===Hls.ErrorTypes.MEDIA_ERROR){
+          if(++mediaTries>2) return noSignal('');
+          hls.recoverMediaError();
+        } else { noSignal(''); }
+      });
+    } else if(v.canPlayType('application/vnd.apple.mpegurl')){
+      v.src=SRC; v.play().catch(function(){});
+    } else {
+      noSignal('This browser can\u2019t play HLS video. Try Chrome, Edge, Safari or Firefox.');
+    }
+  }
+
+  power.addEventListener('click',function(){ on?toOff():toOn(); });
+  document.getElementById('retrybtn').addEventListener('click',function(){
+    screenEl.classList.remove('nosig'); tuning(); attach();
+  });
+
+  /* ---------- video events ---------- */
+  v.addEventListener('playing',function(){
+    if(!on) return;
+    showOverlay(null); busyOff(); snow(0); activity();
+    screenEl.classList.remove('nosig'); setState('LIVE'); setPlay(true);
+  });
+  v.addEventListener('waiting',function(){ if(on){ snow(0.30); busyOn('Buffering\u2026'); } });
+  v.addEventListener('pause',function(){ if(on){ setPlay(false); busyOff(); stopStall(); setState('PAUSED'); } });
+  v.addEventListener('play',function(){ if(on) setPlay(true); });
+  v.addEventListener('ended',function(){ if(on) noSignal(''); });
+  v.addEventListener('error',function(){ if(on) noSignal(); });
+
+  /* ---------- transport ---------- */
+  function setPlay(isOn){ playi.innerHTML=isOn?I_PAUSE:I_PLAY;
+                          play.setAttribute('aria-label',isOn?'Pause':'Play'); }
+  play.addEventListener('click',function(){
+    if(!on) return;
+    if(v.paused){ resync(true); activity(); v.play().catch(function(){}); } else v.pause();
+  });
+  function setVolIcon(){ mutei.innerHTML=(v.muted||v.volume===0)?I_MUTE:I_SPK;
+                         mute.setAttribute('aria-label',v.muted?'Unmute':'Mute'); }
+  mute.addEventListener('click',function(){ v.muted=!v.muted; setVolIcon(); });
+  v.addEventListener('volumechange',setVolIcon);
+  v.addEventListener('timeupdate',function(){ if(on && !v.paused) activity(); });
+  v.addEventListener('progress',function(){ if(on) activity(); });
+
+  /* Only step in if we've drifted so far back we're about to fall out of the
+     live window (e.g. laptop slept). Otherwise leave playback alone -- hls.js
+     eases back on its own via maxLiveSyncPlaybackRate. */
+  var SAFE_BEHIND=14, MAX_BEHIND=20;
+  function edge(){ try{ var b=v.seekable; return b.length?b.end(b.length-1):0; }catch(e){ return 0; } }
+  function resync(force){
+    var e=edge(); if(!e) return;
+    var behind=e-v.currentTime;
+    if(force ? behind>MAX_BEHIND : behind>MAX_BEHIND+5){
+      v.currentTime=Math.max(0, e-SAFE_BEHIND);   // land back in the buffer, not on the edge
+    }
+  }
+  setInterval(function(){ if(on && !v.paused) resync(false); },15000);
+
+  /* ---------- retro CRT filter toggle ---------- */
+  var fx=document.getElementById('fx'), scr=document.getElementById('screen');
+  function setFx(onFx){
+    scr.classList.toggle('nofx', !onFx);
+    fx.classList.toggle('on', onFx);
+    fx.setAttribute('aria-pressed', onFx?'true':'false');
+    fx.setAttribute('aria-label', onFx?'Turn CRT filter off':'Turn CRT filter on');
+    if(window.store) store.set('sb_crt', onFx?'1':'0');
+  }
+  fx.addEventListener('click',function(){ setFx(!fx.classList.contains('on')); });
+  setFx(!(window.store && store.get('sb_crt')==='0'));
+
+  /* ---------- picture in picture ---------- */
+  var pipOK = ('pictureInPictureEnabled' in document && document.pictureInPictureEnabled)
+              || typeof v.webkitSetPresentationMode === 'function';
+  if(!pipOK){ pip.hidden=true; }
+  pip.addEventListener('click',function(){
+    if(!on) return;
+    try{
+      if(document.pictureInPictureElement){ document.exitPictureInPicture(); }
+      else if(v.webkitSetPresentationMode){
+        v.webkitSetPresentationMode(v.webkitPresentationMode==='picture-in-picture'?'inline':'picture-in-picture');
+      }
+      else if(v.requestPictureInPicture){ v.requestPictureInPicture().catch(function(){}); }
+    }catch(e){}
+  });
+  v.addEventListener('enterpictureinpicture',function(){ pip.classList.add('on'); });
+  v.addEventListener('leavepictureinpicture',function(){ pip.classList.remove('on'); });
+
+  document.getElementById('full').addEventListener('click',function(){
+    var box=document.querySelector('.tvscreen-out');
+    if(document.fullscreenElement) document.exitFullscreen();
+    else if(box.requestFullscreen) box.requestFullscreen();
+    else if(v.webkitEnterFullscreen) v.webkitEnterFullscreen();
+  });
+
+  document.addEventListener('keydown',function(e){
+    var t=(document.activeElement&&document.activeElement.tagName)||'';
+    if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT') return;
+    // space/enter belong to whatever control has focus -- don't hijack them
+    var onControl=(t==='BUTTON'||t==='A');
+    if(onControl && (e.key===' '||e.key==='Enter')) return;
+    if(e.key==='p'||e.key==='P'){ e.preventDefault(); power.click(); }
+    else if(e.key===' '||e.key==='k'){ e.preventDefault(); play.click(); }
+    else if(e.key==='m'||e.key==='M'){ mute.click(); }
+    else if(e.key==='f'||e.key==='F'){ document.getElementById('full').click(); }
+    else if(e.key==='c'||e.key==='C'){ fx.click(); }
+    else if(e.key==='i'||e.key==='I'){ pip.click(); }
+  });
+
+  setVolIcon(); toOff();
+})();
+</script>
+</body>
+</html>

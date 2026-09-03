@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>We'll Be Right Back! &middot; SpongeBob Marathon &middot; GioTV</title>
+<meta name="description" content="The GioTV SpongeBob SquarePants Marathon is over for now. We're back December 1st.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="offbody">
+
+<div class="offwrap">
+
+  <img class="offlogo" src="{{LOGO}}" alt="SpongeBob SquarePants Marathon">
+
+  <div class="offcard">
+    <p class="offkicker">The marathon has ended</p>
+    <h1 class="offtitle">We&rsquo;ll Be<br>Right Back!</h1>
+
+    <img class="offsad" src="{{sad}}" alt="A very sad, crying SpongeBob" id="sadsb">
+    <p class="offbubble" id="sadline">Don&rsquo;t cry&hellip; okay, cry a little.</p>
+
+    <p class="offtext">
+      Bikini Bottom is closed for renovations, jellyfishing season, and one
+      extremely overdue nap. Every game, quiz and bingo card is taking a break.
+    </p>
+
+    <div class="offdate">
+      <span class="offdate-l">We&rsquo;re back</span>
+      <strong>December 1st</strong>
+    </div>
+
+    <div class="offcd" id="cd" role="timer" aria-live="off">
+      <div class="offcd-u"><b id="cd-d">--</b><span>Days</span></div>
+      <div class="offcd-u"><b id="cd-h">--</b><span>Hrs</span></div>
+      <div class="offcd-u"><b id="cd-m">--</b><span>Min</span></div>
+      <div class="offcd-u"><b id="cd-s">--</b><span>Sec</span></div>
+    </div>
+    <p class="offlive" id="cd-done" hidden>
+      <a class="btn live" href="https://giotelevision.com/guide#spongebobmarathon"
+         target="_blank" rel="noopener"><span class="livedot" aria-hidden="true"></span>Watch Live</a>
+    </p>
+
+    <p class="offsmall">
+      Until then, catch the rest of the lineup at
+      <a href="https://giotelevision.com/guide" target="_blank" rel="noopener">giotelevision.com</a>.
+    </p>
+  </div>
+
+  <p class="offfoot"><span class="gio">GioTV</span></p>
+</div>
+
+<script>
+(function(){
+  // ---- next December 1st, local time ----
+  function target(){
+    var n=new Date(), y=n.getFullYear();
+    var d=new Date(y,11,1,0,0,0,0);
+    if(n>=d) d=new Date(y+1,11,1,0,0,0,0);
+    return d;
+  }
+  var T=target(), p=function(n){return String(n).padStart(2,'0');};
+  var el={d:document.getElementById('cd-d'),h:document.getElementById('cd-h'),
+          m:document.getElementById('cd-m'),s:document.getElementById('cd-s')};
+  function tick(){
+    var ms=T-new Date();
+    if(ms<=0){
+      document.getElementById('cd').hidden=true;
+      document.getElementById('cd-done').hidden=false;
+      clearInterval(iv); return;
+    }
+    var sec=Math.floor(ms/1000);
+    el.d.textContent=Math.floor(sec/86400);
+    el.h.textContent=p(Math.floor(sec/3600)%24);
+    el.m.textContent=p(Math.floor(sec/60)%60);
+    el.s.textContent=p(sec%60);
+  }
+  tick(); var iv=setInterval(tick,1000);
+
+  // ---- tap SpongeBob for a new sad line ----
+  var LINES=["Don\u2019t cry\u2026 okay, cry a little.",
+             "I can\u2019t see my forehead OR the marathon.",
+             "The inner machinations of my mind are an enigma. And empty.",
+             "Is this the Krusty Krab? No, it\u2019s closed.",
+             "F is for friends who reschedule for December.",
+             "I\u2019m ready\u2026 in about three months.",
+             "Squidward says he\u2019s fine with this, which is suspicious.",
+             "Gary, we\u2019re out of episodes."];
+  var i=0, sad=document.getElementById('sadsb'), line=document.getElementById('sadline');
+  function next(){ i=(i+1)%LINES.length; line.textContent=LINES[i];
+    sad.classList.remove('wob'); void sad.offsetWidth; sad.classList.add('wob'); }
+  sad.addEventListener('click',next);
+  sad.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){e.preventDefault();next();} });
+  sad.tabIndex=0; sad.setAttribute('role','button');
+  sad.setAttribute('aria-label','Tap SpongeBob for another sad thought');
+})();
+</script>
+</body>
+</html>
